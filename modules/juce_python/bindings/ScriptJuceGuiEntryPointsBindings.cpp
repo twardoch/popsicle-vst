@@ -55,6 +55,7 @@ namespace {
 
 // ============================================================================================
 
+#if ! JUCE_PYTHON_EMBEDDED_INTERPRETER
 void runApplication (JUCEApplicationBase* application, int milliseconds)
 {
     {
@@ -91,6 +92,7 @@ void runApplication (JUCEApplicationBase* application, int milliseconds)
             throw py::error_already_set();
     }
 }
+#endif
 
 } // namespace
 

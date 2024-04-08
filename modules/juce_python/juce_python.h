@@ -47,7 +47,7 @@
 //==============================================================================
 /** Config: JUCE_PYTHON_EMBEDDED_INTERPRETER
 
-    Enable or disable embedding the interpreter. This should be disabled when
+    Enable or disable embedding the interpreter. This should be disabled when building standalone wheels.
 */
 #ifndef JUCE_PYTHON_EMBEDDED_INTERPRETER
  #define JUCE_PYTHON_EMBEDDED_INTERPRETER 1

@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output-folder", type=Path, help="Path to the output folder.")
     parser.add_argument("-M", "--version-major", type=int, help="Major version number (integer).")
     parser.add_argument("-m", "--version-minor", type=int, help="Minor version number (integer).")
-    parser.add_argument("-i", "--ignore-patterns", type=str, default=None, help="Ignored patterns (semicolon separated list).")
+    parser.add_argument("-x", "--exclude-patterns", type=str, default=None, help="Excluded patterns (semicolon separated list).")
 
     args = parser.parse_args()
 
@@ -74,8 +74,8 @@ if __name__ == "__main__":
         "LICENSE.txt",
     ]
 
-    if args.ignore_patterns:
-        custom_patterns = [x.strip() for x in args.ignore_patterns.split(";")]
+    if args.exclude_patterns:
+        custom_patterns = [x.strip() for x in args.exclude_patterns.split(";")]
         base_patterns += custom_patterns
 
     ignored_files = shutil.ignore_patterns(*base_patterns)

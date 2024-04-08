@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.21)
 
-set (PROJECT_NAME popsicle_demo)
-get_filename_component (ROOT_PATH "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
+set (PROJECT_NAME popsicle_standalone_demo)
+get_filename_component (ROOT_PATH "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 file (STRINGS "${ROOT_PATH}/modules/juce_python/juce_python.h" JUCE_PYTHON_MODULE)
 string (REGEX REPLACE "(.*)([0-9]+\.[0-9]+\.[0-9]+)(.*)" "\\2" VERSION_NUMBER ${JUCE_PYTHON_MODULE})
 project (${PROJECT_NAME} VERSION ${VERSION_NUMBER})
@@ -36,8 +36,10 @@ add_subdirectory (${MODULES_PATH} ./modules)
 #    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/popsicle)
 #FetchContent_MakeAvailable (popsicle)
 
-# Configure python (APPLE only for now)
-set (Python_ROOT_DIR "/Library/Frameworks/Python.framework/Versions/Current")
+# Configure python
+if (APPLE)
+    set (Python_ROOT_DIR "/Library/Frameworks/Python.framework/Versions/Current")
+endif()
 set (Python_USE_STATIC_LIBS TRUE)
 find_package (Python REQUIRED Interpreter Development.Embed)
 
@@ -56,7 +58,7 @@ add_custom_target (
     ${PROJECT_NAME}_stdlib
     ${Python_EXECUTABLE} ${ROOT_PATH}/cmake/ArchivePythonStdlib.py
         -b ${Python_ROOT_DIR} -o ${CMAKE_CURRENT_BINARY_DIR} -M ${Python_VERSION_MAJOR} -m ${Python_VERSION_MINOR}
-        -i "\"${ADDITIONAL_IGNORED_PYTHON_PATTERNS}\""
+        -x "\"${ADDITIONAL_IGNORED_PYTHON_PATTERNS}\""
     BYPRODUCTS ${PYTHON_STANDARD_LIBRARY})
 add_dependencies (${PROJECT_NAME} ${PROJECT_NAME}_stdlib)
 

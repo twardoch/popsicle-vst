@@ -263,7 +263,7 @@ setuptools.setup(
     long_description=load_description(version),
     long_description_content_type="text/x-rst",
     url="https://github.com/kunitoki/popsicle",
-    packages=setuptools.find_packages(".", exclude=["*cmake*", "*demo*", "*examples*", "*images*", "*JUCE*", "*scripts*", "*tests*"]),
+    packages=setuptools.find_packages(".", exclude=["*cmake*", "*demos*", "*examples*", "*images*", "*JUCE*", "*scripts*", "*tests*"]),
     include_package_data=True,
     cmdclass={"build_ext": CMakeBuildExtension, "install_scripts": CustomInstallScripts},
     ext_modules=[CMakeExtension(project_name)],
