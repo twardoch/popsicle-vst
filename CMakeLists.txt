@@ -80,7 +80,8 @@ if (NOT "${Python_LIBRARY_DIRS}" STREQUAL "")
     target_link_directories (${PROJECT_NAME} PRIVATE "${Python_LIBRARY_DIRS}")
 endif()
 
-if (NOT APPLE AND UNIX)
+if (APPLE)
+elseif (UNIX)
     target_include_directories (${PROJECT_NAME} PUBLIC "/usr/include/freetype2")
 endif()
 
