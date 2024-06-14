@@ -66,7 +66,7 @@ class Node(NamedTuple):
 
 
 class EmojiComponent(juce.Component):
-    font: juce.Font = juce.Font(12.0)
+    font: juce.Font = juce.Font(juce.FontOptions(12.0))
     colour: juce.Colour = juce.Colours.black
     nodes: List[List[Node]]
 
@@ -142,7 +142,7 @@ class ExampleComponent(juce.Component):
         juce.Component.__init__(self)
 
         self.emoji_one = EmojiComponent()
-        self.emoji_one.setFont(juce.Font(16.0))
+        self.emoji_one.setFont(juce.Font(juce.FontOptions(16.0)))
         self.emoji_one.setColour(juce.Colours.white)
         self.emoji_one.setText(dedent("""
             I 🕴️ 100% 💶 agree 💯 that 👉💀🔕🐑 this automated 🏧 generator does 👩‍🦲 NOT 🚯🚯🚯 provide 👋 the same 😯
@@ -155,7 +155,7 @@ class ExampleComponent(juce.Component):
         self.slider = juce.Slider()
         self.slider.setRange(1.0, 100, 0.1)
         self.slider.setValue(16.0)
-        self.slider.onValueChange = lambda: self.emoji_one.setFont(juce.Font(self.slider.getValue()))
+        self.slider.onValueChange = lambda: self.emoji_one.setFont(juce.Font(juce.FontOptions(self.slider.getValue())))
         self.addAndMakeVisible(self.slider)
 
         self.setOpaque(True)

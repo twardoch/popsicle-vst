@@ -102,7 +102,7 @@ class TutorialDataSorter(juce.XmlElement.Comparator):
 
 
 class TableTutorialComponent(juce.Component, juce.TableListBoxModel):
-    font = juce.Font(14.0)
+    font = juce.Font(juce.FontOptions(14.0))
     numRows = 0
     columnList = None
     dataList = None

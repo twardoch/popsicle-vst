@@ -89,7 +89,6 @@ void registerPoint (py::module_& m)
             .def ("getDistanceSquaredFromOrigin", &T::getDistanceSquaredFromOrigin)
             .def ("getDistanceSquaredFrom", &T::getDistanceSquaredFrom)
             .def ("getAngleToPoint", &T::getAngleToPoint)
-            .def ("rotatedAboutOrigin", &T::rotatedAboutOrigin)
             .def ("getPointOnCircumference", py::overload_cast<float, float>(&T::getPointOnCircumference, py::const_))
             .def ("getPointOnCircumference", py::overload_cast<float, float, float>(&T::getPointOnCircumference, py::const_))
             .def ("getDotProduct", &T::getDotProduct)
@@ -112,6 +111,12 @@ void registerPoint (py::module_& m)
             })
             .def ("__str__", &T::toString)
         ;
+
+        if constexpr (std::is_floating_point_v<ValueType>)
+        {
+            class_
+                .def ("rotatedAboutOrigin", [](const T& self, float angleRadians) { return self.rotatedAboutOrigin (angleRadians); });
+        }
 
         type[py::type::of (py::cast (Types{}))] = class_;
 
@@ -647,11 +652,11 @@ void registerJuceGraphicsBindings (py::module_& m)
         .def_readwrite ("mat12", &AffineTransform::mat12)
         .def ("__repr__", [](const AffineTransform& self)
         {
-            String result;
-            result
+            String repr;
+            repr
                 << Helpers::pythonizeModuleClassName (PythonModuleName, typeid (self).name())
                 << "(" << self.mat00 << ", " << self.mat01 << ", " << self.mat02 << ", " << self.mat10 << ", " << self.mat11 << ", " << self.mat12 << ")";
-            return result;
+            return repr;
         })
     ;
 
@@ -780,9 +785,9 @@ void registerJuceGraphicsBindings (py::module_& m)
         .def ("restoreFromString", &Path::restoreFromString)
         .def ("__repr__", [](const Path& self)
         {
-            String result;
-            result << Helpers::pythonizeModuleClassName (PythonModuleName, typeid (self).name()) << "('" << self.toString() << "')";
-            return result;
+            String repr;
+            repr << Helpers::pythonizeModuleClassName (PythonModuleName, typeid (self).name()) << "('" << self.toString() << "')";
+            return repr;
         })
         .def ("__str__", &Path::toString)
     ;
@@ -1048,11 +1053,11 @@ void registerJuceGraphicsBindings (py::module_& m)
         .def ("toDisplayString", &Colour::toDisplayString)
         .def ("__repr__", [](const Colour& self)
         {
-            String result;
-            result
+            String repr;
+            repr
                 << Helpers::pythonizeModuleClassName (PythonModuleName, typeid (self).name())
                 << "(" << self.getRed() << ", " << self.getGreen() << ", " << self.getBlue() << ", " << self.getAlpha() << ")";
-            return result;
+            return repr;
         })
         .def ("__str__", &Colour::toString)
     ;
@@ -1323,6 +1328,7 @@ void registerJuceGraphicsBindings (py::module_& m)
     // ============================================================================================ juce::Font
 
     py::class_<Font> classFont (m, "Font");
+    py::class_<FontOptions> classFontOptions (m, "FontOptions");
 
     Helpers::makeArithmeticEnum<Font::FontStyleFlags> (classFont, "FontStyleFlags")
         .value ("plain", Font::FontStyleFlags::plain)
@@ -1331,14 +1337,48 @@ void registerJuceGraphicsBindings (py::module_& m)
         .value ("underlined", Font::FontStyleFlags::underlined)
         .export_values();
 
-    classFont
+    classFontOptions
         .def (py::init<>())
+        .def (py::init<float>(), "fontHeight"_a)
         .def (py::init<float, int>(), "fontHeight"_a, "styleFlags"_a = Font::plain)
         .def (py::init<float, Font::FontStyleFlags>(), "fontHeight"_a, "styleFlags"_a)
-        .def (py::init<const String&, float, Font::FontStyleFlags>())
-        .def (py::init<const String&, const String&, float>())
-        .def (py::init<const Font&>())
+        .def (py::init<const String&, float, Font::FontStyleFlags>(), "typefaceName"_a, "fontHeight"_a, "styleFlags"_a)
+        .def (py::init<const String&, const String&, float>(), "typefaceName"_a, "typefaceStyle"_a, "styleFlags"_a)
     //.def (py::init<const Typeface::Ptr&>())
+        .def (py::init<const FontOptions&>())
+        .def (py::self == py::self)
+        .def (py::self != py::self)
+        .def (py::self < py::self)
+        .def (py::self <= py::self)
+        .def (py::self > py::self)
+        .def (py::self >= py::self)
+        .def ("withName", &FontOptions::withName)
+        .def ("withStyle", &FontOptions::withStyle)
+        .def ("withTypeface", &FontOptions::withTypeface)
+        .def ("withFallbacks", &FontOptions::withFallbacks)
+        .def ("withFallbackEnabled", &FontOptions::withFallbackEnabled, "x"_a = true)
+        .def ("withHeight", &FontOptions::withHeight, "x"_a)
+        .def ("withPointHeight", &FontOptions::withPointHeight, "x"_a)
+        .def ("withKerningFactor", &FontOptions::withKerningFactor, "x"_a)
+        .def ("withHorizontalScale", &FontOptions::withHorizontalScale, "x"_a)
+        .def ("withUnderline", &FontOptions::withUnderline, "x"_a = true)
+    //.def ("withMetricsKind", &FontOptions::withMetricsKind)
+        .def ("getName", &FontOptions::getName)
+        .def ("getStyle", &FontOptions::getStyle)
+        .def ("getTypeface", &FontOptions::getTypeface)
+        .def ("getFallbacks", &FontOptions::getFallbacks)
+        .def ("getHeight", &FontOptions::getHeight)
+        .def ("getPointHeight", &FontOptions::getPointHeight)
+        .def ("getKerningFactor", &FontOptions::getKerningFactor)
+        .def ("getHorizontalScale", &FontOptions::getHorizontalScale)
+        .def ("getFallbackEnabled", &FontOptions::getFallbackEnabled)
+        .def ("getUnderline", &FontOptions::getUnderline)
+    //.def ("getMetricsKind", &FontOptions::getMetricsKind)
+    ;
+
+    classFont
+        .def (py::init<FontOptions>(), "fontOptions"_a)
+        .def (py::init<const Font&>())
         .def (py::self == py::self)
         .def (py::self != py::self)
         .def ("setTypefaceName", &Font::setTypefaceName)
@@ -1394,17 +1434,17 @@ void registerJuceGraphicsBindings (py::module_& m)
     //.def_static ("findFonts", &Font::findFonts)
         .def_static ("findAllTypefaceNames", &Font::findAllTypefaceNames)
         .def_static ("findAllTypefaceStyles", &Font::findAllTypefaceStyles)
-        .def_static ("getFallbackFontName", &Font::getFallbackFontName)
-        .def_static ("setFallbackFontName", &Font::setFallbackFontName)
-        .def_static ("getFallbackFontStyle", &Font::getFallbackFontStyle)
-        .def_static ("setFallbackFontStyle", &Font::setFallbackFontStyle)
+    //.def_static ("getFallbackFontName", &Font::getFallbackFontName)
+    //.def_static ("setFallbackFontName", &Font::setFallbackFontName)
+    //.def_static ("getFallbackFontStyle", &Font::getFallbackFontStyle)
+    //.def_static ("setFallbackFontStyle", &Font::setFallbackFontStyle)
         .def ("toString", &Font::toString)
         .def_static ("fromString", &Font::fromString)
         .def ("__repr__", [](const Font& self)
         {
-            String result;
-            result << Helpers::pythonizeModuleClassName (PythonModuleName, typeid (self).name()) << "('" << self.toString() << ")";
-            return result;
+            String repr;
+            repr << Helpers::pythonizeModuleClassName (PythonModuleName, typeid (self).name()) << "('" << self.toString() << ")";
+            return repr;
         })
         .def ("__str__", &Font::toString)
     ;

@@ -110,7 +110,7 @@ struct PyLowLevelGraphicsContext : Base
         PYBIND11_OVERRIDE_PURE (void, Base, addTransform, transform);
     }
 
-    float getPhysicalPixelScaleFactor() override
+    float getPhysicalPixelScaleFactor() const override
     {
         PYBIND11_OVERRIDE_PURE (float, Base, getPhysicalPixelScaleFactor);
     }
@@ -235,14 +235,16 @@ struct PyLowLevelGraphicsContext : Base
         PYBIND11_OVERRIDE_PURE (const juce::Font&, Base, getFont);
     }
 
-    void drawGlyph (int glyphNumber, const juce::AffineTransform& transform) override
+    void drawGlyphs (juce::Span<const uint16_t> glyphs,
+                     juce::Span<const juce::Point<float>> glyphsPositions,
+                     const juce::AffineTransform& transform) override
     {
-        PYBIND11_OVERRIDE_PURE (void, Base, drawGlyph, glyphNumber, transform);
+        PYBIND11_OVERRIDE_PURE (void, Base, drawGlyphs, glyphs, glyphsPositions, transform);
     }
 
-    bool drawTextLayout (const juce::AttributedString& string, const juce::Rectangle<float>& rect) override
+    uint64_t getFrameId() const override
     {
-        PYBIND11_OVERRIDE (bool, Base, drawTextLayout, string, rect);
+        PYBIND11_OVERRIDE_PURE (uint64_t, Base, getFrameId);
     }
 };
 
