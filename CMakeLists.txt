@@ -81,7 +81,7 @@ if (NOT "${Python_LIBRARY_DIRS}" STREQUAL "")
 endif()
 
 if (NOT APPLE AND UNIX)
-    target_include_directories (${PROJECT_NAME} PRIVATE "/usr/include/freetype2")
+    target_include_directories (${PROJECT_NAME} PUBLIC "/usr/include/freetype2")
 endif()
 
 target_compile_definitions (${PROJECT_NAME} PRIVATE
