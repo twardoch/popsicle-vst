@@ -18,7 +18,7 @@ endif()
 
 # Fix linux issue
 if (UNIX AND NOT APPLE)
-    include_directories (SYSTEM "/usr/include/freetype2")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/include/freetype2")
 endif()
 
 # Fetch/Include juce (set browsable modules in IDE)
