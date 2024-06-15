@@ -39,7 +39,7 @@ before-build = [
     "yum localinstall -y lcov-2.0-1.noarch.rpm",
     "yum localinstall -y perl-JSON-XS-3.01-2.el7.x86_64.rpm",
     "sed -i \"s/use JSON::PP/use JSON::XS/g\" /usr/bin/geninfo",
-    "ls -la /usr/include/freetype2"
+    "ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h"
 ]
 test-command = [
     "xvfb-run -a -s \"-screen 0 1024x768x24\" pytest -s {project}/tests"
