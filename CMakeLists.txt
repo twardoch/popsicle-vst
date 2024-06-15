@@ -82,7 +82,7 @@ endif()
 
 if (APPLE)
 elseif (UNIX)
-    target_include_directories (${PROJECT_NAME} PUBLIC "/usr/include/freetype2")
+    include_directories (SYSTEM "/usr/include/freetype2")
 endif()
 
 target_compile_definitions (${PROJECT_NAME} PRIVATE
