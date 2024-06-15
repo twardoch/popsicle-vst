@@ -35,9 +35,9 @@ before-build = [
         xorg-x11-proto-devel libcurl-devel libpng-devel libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXrender-devel \
         libXcomposite-devel libXinerama-devel libXcursor-devel xorg-x11-server-Xvfb fontconfig-devel wget""",
     "wget https://github.com/linux-test-project/lcov/releases/download/v2.0/lcov-2.0-1.noarch.rpm",
-    "wget https://rpmfind.net/linux/epel/7/x86_64/Packages/p/perl-JSON-XS-3.01-2.el7.x86_64.rpm",
+    "wget https://repo.almalinux.org/almalinux/8/PowerTools/x86_64/os/Packages/perl-JSON-XS-3.04-3.el8.x86_64.rpm",
     "yum localinstall -y lcov-2.0-1.noarch.rpm",
-    "yum localinstall -y perl-JSON-XS-3.01-2.el7.x86_64.rpm",
+    "yum localinstall -y perl-JSON-XS-3.04-3.el8.x86_64.rpm",
     "sed -i \"s/use JSON::PP/use JSON::XS/g\" /usr/bin/geninfo",
     "ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h",
     "ln -s /usr/include/freetype2/freetype /usr/include/freetype"
