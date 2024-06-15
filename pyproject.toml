@@ -26,12 +26,12 @@ testpaths = ["tests/"]
 build-verbosity = 3
 test-requires = "pytest numpy imageio"
 test-command = "pytest -s {project}/tests"
-manylinux-x86_64-image = "manylinux2014"
-manylinux-i686-image = "manylinux2014"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-i686-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
 before-build = [
-    """yum install -y zlib-devel openssl-devel freetype-devel freeglut-devel alsa-lib-devel mesa-libGL-devel xorg-x11-proto-devel \
+    """dnf install -y zlib-devel openssl-devel freetype-devel freeglut-devel alsa-lib-devel mesa-libGL-devel xorg-x11-proto-devel \
         xorg-x11-proto-devel libcurl-devel libpng-devel libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXrender-devel \
         libXcomposite-devel libXinerama-devel libXcursor-devel xorg-x11-server-Xvfb fontconfig-devel wget""",
     "wget https://github.com/linux-test-project/lcov/releases/download/v2.0/lcov-2.0-1.noarch.rpm",
