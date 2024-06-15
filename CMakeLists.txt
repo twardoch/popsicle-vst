@@ -16,6 +16,11 @@ else()
     message(STATUS "${PROJECT_NAME} - Using python includes (provided): ${Python_INCLUDE_DIRS}")
 endif()
 
+# Fix linux issue
+if (UNIX AND NOT APPLE)
+    include_directories (SYSTEM "/usr/include/freetype2")
+endif()
+
 # Fetch/Include juce (set browsable modules in IDE)
 set_property (GLOBAL PROPERTY USE_FOLDERS YES)
 option (JUCE_ENABLE_MODULE_SOURCE_GROUPS "Enable Module Source Groups" ON)
@@ -78,11 +83,6 @@ endif()
 target_include_directories (${PROJECT_NAME} PRIVATE "${Python_INCLUDE_DIRS}")
 if (NOT "${Python_LIBRARY_DIRS}" STREQUAL "")
     target_link_directories (${PROJECT_NAME} PRIVATE "${Python_LIBRARY_DIRS}")
-endif()
-
-if (APPLE)
-elseif (UNIX)
-    include_directories (SYSTEM "/usr/include/freetype2")
 endif()
 
 target_compile_definitions (${PROJECT_NAME} PRIVATE
