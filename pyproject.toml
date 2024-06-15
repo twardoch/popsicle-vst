@@ -28,6 +28,7 @@ test-requires = "pytest numpy imageio"
 test-command = "pytest -s {project}/tests"
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-i686-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
 before-build = [
