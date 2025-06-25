@@ -1,12 +1,12 @@
 import sys
+
 sys.path.insert(0, "../")
 
 import math
+
 import cppyy
 import cppyy.ll
-
-from popsicle import juce_gui_basics, juce_audio_utils
-from popsicle import juce, juce_multi, START_JUCE_COMPONENT
+from popsicle import START_JUCE_COMPONENT, juce, juce_multi
 
 
 class SineWaveSound(juce.SynthesiserSound):
@@ -62,7 +62,9 @@ class SineWaveVoice(juce.SynthesiserVoice):
 
         if self.tailOff > 0.0:
             for _ in range(numSamples):
-                currentSample = float(math.sin(self.currentAngle) * self.level * self.tailOff)
+                currentSample = float(
+                    math.sin(self.currentAngle) * self.level * self.tailOff
+                )
 
                 for i in reversed(range(outputBuffer.getNumChannels())):
                     outputBuffer.addSample(i, startSample, currentSample)
@@ -119,11 +121,15 @@ class SynthAudioSource(juce.AudioSource):
         bufferToFill.clearActiveBufferRegion()
 
         incomingMidi = juce.MidiBuffer()
-        self.midiCollector.removeNextBlockOfMessages(incomingMidi, bufferToFill.numSamples)
+        self.midiCollector.removeNextBlockOfMessages(
+            incomingMidi, bufferToFill.numSamples
+        )
 
-        self.keyboardState.processNextMidiBuffer(incomingMidi, bufferToFill.startSample, bufferToFill.numSamples, True)
+        self.keyboardState.processNextMidiBuffer(
+            incomingMidi, bufferToFill.startSample, bufferToFill.numSamples, True
+        )
 
-        #self.synth.renderNextBlock(bufferToFill.buffer, incomingMidi, bufferToFill.startSample, bufferToFill.numSamples)
+        # self.synth.renderNextBlock(bufferToFill.buffer, incomingMidi, bufferToFill.startSample, bufferToFill.numSamples)
 
     def getMidiCollector(self):
         return self.midiCollector
@@ -139,7 +145,9 @@ class MainContentComponent(juce_multi(juce.AudioAppComponent, juce.Timer)):
         super().__init__((), ())
 
         self.synthAudioSource = SynthAudioSource(self.keyboardState)
-        self.keyboardComponent = juce.MidiKeyboardComponent(self.keyboardState, juce.MidiKeyboardComponent.horizontalKeyboard)
+        self.keyboardComponent = juce.MidiKeyboardComponent(
+            self.keyboardState, juce.MidiKeyboardComponent.horizontalKeyboard
+        )
 
         self.addAndMakeVisible(self.midiInputListLabel)
         self.midiInputListLabel.setText("MIDI Input:", juce.dontSendNotification)
@@ -157,6 +165,7 @@ class MainContentComponent(juce_multi(juce.AudioAppComponent, juce.Timer)):
 
         def onChange():
             self.setMidiInput(self.midiInputList.getSelectedItemIndex())
+
         self.midiInputList.onChange = onChange
 
         for midiInput in midiInputs:
@@ -181,7 +190,9 @@ class MainContentComponent(juce_multi(juce.AudioAppComponent, juce.Timer)):
 
     def resized(self):
         self.midiInputList.setBounds(200, 10, self.getWidth() - 210, 20)
-        self.keyboardComponent.setBounds(10, 40, self.getWidth() - 20, self.getHeight() - 50)
+        self.keyboardComponent.setBounds(
+            10, 40, self.getWidth() - 20, self.getHeight() - 50
+        )
 
     def prepareToPlay(self, samplesPerBlockExpected, sampleRate):
         self.synthAudioSource.prepareToPlay(samplesPerBlockExpected, sampleRate)
@@ -199,15 +210,19 @@ class MainContentComponent(juce_multi(juce.AudioAppComponent, juce.Timer)):
     def setMidiInput(self, index):
         availableDevices = juce.MidiInput.getAvailableDevices()
 
-        self.deviceManager.removeMidiInputDeviceCallback(availableDevices[self.lastInputIndex].identifier,
-                                                         self.synthAudioSource.getMidiCollector())
+        self.deviceManager.removeMidiInputDeviceCallback(
+            availableDevices[self.lastInputIndex].identifier,
+            self.synthAudioSource.getMidiCollector(),
+        )
 
         newInput = availableDevices[index]
 
         if not self.deviceManager.isMidiInputDeviceEnabled(newInput.identifier):
             self.deviceManager.setMidiInputDeviceEnabled(newInput.identifier, True)
 
-        self.deviceManager.addMidiInputDeviceCallback(newInput.identifier, self.synthAudioSource.getMidiCollector())
+        self.deviceManager.addMidiInputDeviceCallback(
+            newInput.identifier, self.synthAudioSource.getMidiCollector()
+        )
         self.midiInputList.setSelectedId(index + 1, juce.dontSendNotification)
 
         self.lastInputIndex = index

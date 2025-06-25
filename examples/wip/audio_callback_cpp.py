@@ -1,11 +1,9 @@
 import sys
+
 sys.path.insert(0, "../")
 
 import cppyy
-
-from popsicle import juce_gui_basics, juce_audio_utils
-from popsicle import juce, juce_multi, START_JUCE_COMPONENT
-
+from popsicle import START_JUCE_COMPONENT, juce
 
 cppyy.cppdef("""
 class AudioCallback : public juce::AudioIODeviceCallback
@@ -64,6 +62,7 @@ class MainContentComponent2(juce.Component):
 
     def paint(self, g):
         g.fillAll(juce.Colours.slategrey)
+
 
 if __name__ == "__main__":
     START_JUCE_COMPONENT(MainContentComponent2, name="C++ Audio Callback")

@@ -1,5 +1,9 @@
-from juce_init import START_JUCE_COMPONENT
-import popsicle as juce
+import sys
+
+sys.path.insert(0, "../")
+
+
+from popsicle import START_JUCE_COMPONENT, juce
 
 
 class MainContentComponent(juce.Component):
@@ -15,11 +19,15 @@ class MainContentComponent(juce.Component):
     def __init__(self):
         super().__init__()
 
-        self.header.setColour(juce.TextButton.buttonColourId, juce.Colours.cornflowerblue)
+        self.header.setColour(
+            juce.TextButton.buttonColourId, juce.Colours.cornflowerblue
+        )
         self.header.setButtonText("Header")
         self.addAndMakeVisible(self.header)
 
-        self.footer.setColour(juce.TextButton.buttonColourId, juce.Colours.cornflowerblue)
+        self.footer.setColour(
+            juce.TextButton.buttonColourId, juce.Colours.cornflowerblue
+        )
         self.footer.setButtonText("Footer")
         self.addAndMakeVisible(self.footer)
 
@@ -30,13 +38,17 @@ class MainContentComponent(juce.Component):
         self.limeContent.setColour(juce.TextButton.buttonColourId, juce.Colours.lime)
         self.addAndMakeVisible(self.limeContent)
 
-        self.grapefruitContent.setColour(juce.TextButton.buttonColourId, juce.Colours.yellowgreen)
+        self.grapefruitContent.setColour(
+            juce.TextButton.buttonColourId, juce.Colours.yellowgreen
+        )
         self.addAndMakeVisible(self.grapefruitContent)
 
         self.lemonContent.setColour(juce.TextButton.buttonColourId, juce.Colours.yellow)
         self.addAndMakeVisible(self.lemonContent)
 
-        self.orangeContent.setColour(juce.TextButton.buttonColourId, juce.Colours.orange)
+        self.orangeContent.setColour(
+            juce.TextButton.buttonColourId, juce.Colours.orange
+        )
         self.addAndMakeVisible(self.orangeContent)
 
         self.setSize(400, 400)

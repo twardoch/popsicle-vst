@@ -1,5 +1,9 @@
-from juce_init import START_JUCE_COMPONENT
-import popsicle as juce
+import sys
+
+sys.path.insert(0, "../")
+
+
+from popsicle import START_JUCE_COMPONENT, juce
 
 
 class RightSidePanel(juce.Component):
@@ -13,7 +17,7 @@ class RightSidePanel(juce.Component):
             self.backgroundColour = colour
 
         for i in range(10):
-            button = juce.TextButton(str(i))
+            button = juce.TextButton(juce.String(i))
 
             self.buttons.append(button)
             self.addAndMakeVisible(button)
@@ -60,11 +64,15 @@ class LeftSidePanel(juce.Component):
         knobBox.justifyContent = juce.FlexBox.JustifyContent.spaceBetween
 
         for k in self.knobs:
-            knobBox.items.add(juce.FlexItem(k).withMinHeight(50.0).withMinWidth(50.0).withFlex(1))
+            knobBox.items.add(
+                juce.FlexItem(k).withMinHeight(50.0).withMinWidth(50.0).withFlex(1)
+            )
 
         fb = juce.FlexBox()
         fb.flexDirection = juce.FlexBox.Direction.column
+
         fb.items.add(juce.FlexItem(knobBox).withFlex(2.5))
+
         fb.performLayout(self.getLocalBounds().toFloat())
 
 
@@ -76,19 +84,24 @@ class MainPanel(juce.Component):
 
         for _ in range(5):
             slider = juce.Slider()
-            slider.setTextBoxStyle(juce.Slider.TextEntryBoxPosition.NoTextBox, True, 0, 0)
-
             self.sliders.append(slider)
             self.addAndMakeVisible(slider)
+            self.sliders[-1].setTextBoxStyle(
+                juce.Slider.TextEntryBoxPosition.NoTextBox, True, 0, 0
+            )
 
     def paint(self, g):
         g.fillAll(juce.Colours.hotpink)
 
     def resized(self):
-        isPortrait = self.getLocalBounds().getHeight() > self.getLocalBounds().getWidth()
+        isPortrait = (
+            self.getLocalBounds().getHeight() > self.getLocalBounds().getWidth()
+        )
 
         fb = juce.FlexBox()
-        fb.flexDirection = juce.FlexBox.Direction.column if isPortrait else juce.FlexBox.Direction.row
+        fb.flexDirection = (
+            juce.FlexBox.Direction.column if isPortrait else juce.FlexBox.Direction.row
+        )
 
         for s in self.sliders:
             if isPortrait:
@@ -96,7 +109,13 @@ class MainPanel(juce.Component):
             else:
                 s.setSliderStyle(juce.Slider.SliderStyle.LinearVertical)
 
-            fb.items.add(juce.FlexItem(s).withFlex(0, 1, self.getHeight() / 5.0 if isPortrait else self.getWidth() / 5.0))
+            fb.items.add(
+                juce.FlexItem(s).withFlex(
+                    0,
+                    1,
+                    self.getHeight() / 5.0 if isPortrait else self.getWidth() / 5.0,
+                )
+            )
 
         fb.performLayout(self.getLocalBounds().toFloat())
 
@@ -116,15 +135,11 @@ class MainContentComponent(juce.Component):
         self.setSize(600, 400)
 
     def paint(self, g):
-        g.fillAll(self.getLookAndFeel().findColour(juce.ResizableWindow.backgroundColourId))
+        g.fillAll(
+            self.getLookAndFeel().findColour(juce.ResizableWindow.backgroundColourId)
+        )
 
     def resized(self):
-        bounds = self.getLocalBounds()
-        self.leftPanel.setBounds(bounds.removeFromLeft(self.proportionOfWidth(0.25)))
-        self.rightPanel.setBounds(bounds.removeFromRight(self.proportionOfWidth(0.25)))
-        self.mainPanel.setBounds(bounds)
-
-        """
         grid = juce.Grid()
 
         grid.templateRows.add(juce.Grid.TrackInfo(juce.Grid.Fr(1)))
@@ -137,7 +152,6 @@ class MainContentComponent(juce.Component):
         grid.items.add(juce.GridItem(self.rightPanel))
 
         grid.performLayout(self.getLocalBounds())
-        """
 
 
 if __name__ == "__main__":

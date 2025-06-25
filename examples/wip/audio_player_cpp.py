@@ -1,12 +1,11 @@
 import sys
+
 sys.path.insert(0, "../")
 
-import math
-import cppyy
 from enum import Enum
 
-from popsicle import juce_gui_basics, juce_audio_utils
-from popsicle import juce, juce_multi, START_JUCE_COMPONENT
+import cppyy
+from popsicle import START_JUCE_COMPONENT, juce, juce_multi
 
 cppyy.cppdef("""
 
@@ -47,7 +46,9 @@ class TransportState(Enum):
     Stopping = 3
 
 
-class MainContentComponent(juce_multi(cppyy.gbl.AudioAppComponent, juce.ChangeListener, juce.Timer)):
+class MainContentComponent(
+    juce_multi(cppyy.gbl.AudioAppComponent, juce.ChangeListener, juce.Timer)
+):
     openButton = juce.TextButton()
     playButton = juce.TextButton()
     stopButton = juce.TextButton()
@@ -65,8 +66,8 @@ class MainContentComponent(juce_multi(cppyy.gbl.AudioAppComponent, juce.ChangeLi
         self.openButton.setButtonText("Open...")
         self.openButton.onClick = self.openButtonClicked
 
-        self.addAndMakeVisible (self.playButton)
-        self.playButton.setButtonText ("Play")
+        self.addAndMakeVisible(self.playButton)
+        self.playButton.setButtonText("Play")
         self.playButton.onClick = self.playButtonClicked
         self.playButton.setColour(juce.TextButton.buttonColourId, juce.Colours.green)
         self.playButton.setEnabled(False)
@@ -127,9 +128,9 @@ class MainContentComponent(juce_multi(cppyy.gbl.AudioAppComponent, juce.ChangeLi
 
             minutes = int(position.inMinutes()) % 60
             seconds = int(position.inSeconds()) % 60
-            millis  = int(position.inMilliseconds()) % 1000
+            millis = int(position.inMilliseconds()) % 1000
 
-            positionString = "{:02d}:{:02d}:{:03d}".format(minutes, seconds, millis)
+            positionString = f"{minutes:02d}:{seconds:02d}:{millis:03d}"
 
             self.currentPositionLabel.setText(positionString, juce.dontSendNotification)
         else:
@@ -139,7 +140,7 @@ class MainContentComponent(juce_multi(cppyy.gbl.AudioAppComponent, juce.ChangeLi
         if self.readerSource:
             self.readerSource.setLooping(shouldLoop)
 
-    def changeState (self, newState):
+    def changeState(self, newState):
         if self.state == newState:
             return
 
@@ -161,14 +162,18 @@ class MainContentComponent(juce_multi(cppyy.gbl.AudioAppComponent, juce.ChangeLi
             self.transportSource.stop()
 
     def openButtonClicked(self):
-        chooser = juce.FileChooser("Select a Wave file to play...", juce.File(), "*.wav")
+        chooser = juce.FileChooser(
+            "Select a Wave file to play...", juce.File(), "*.wav"
+        )
 
         if chooser.browseForFileToOpen():
             reader = self.formatManager.createReaderFor(chooser.getResult())
 
             if reader:
                 self.readerSource = juce.AudioFormatReaderSource(reader, True)
-                self.transportSource.setSource(self.readerSource, 0, cppyy.nullptr, reader.sampleRate, 2)
+                self.transportSource.setSource(
+                    self.readerSource, 0, cppyy.nullptr, reader.sampleRate, 2
+                )
                 self.hasReader.set(True)
 
                 self.playButton.setEnabled(True)

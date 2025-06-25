@@ -1,14 +1,11 @@
+import sys
+
+sys.path.insert(0, "../")
+
 from enum import Enum
 
-from juce_init import START_JUCE_COMPONENT
-import popsicle as juce
-
-
-class TransportState(Enum):
-    Stopped = 0
-    Starting = 1
-    Playing = 2
-    Stopping = 3
+import cppyy
+from popsicle import START_JUCE_COMPONENT, juce, juce_multi
 
 
 class AudioSource(juce.AudioSource):
@@ -16,7 +13,7 @@ class AudioSource(juce.AudioSource):
     hasReader = juce.Atomic[bool](False)
 
     def __init__(self):
-        juce.AudioSource.__init__(self)
+        super().__init__()
 
     def prepareToPlay(self, samplesPerBlockExpected, sampleRate):
         self.transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate)
@@ -31,7 +28,14 @@ class AudioSource(juce.AudioSource):
         self.transportSource.releaseResources()
 
 
-class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
+class TransportState(Enum):
+    Stopped = 0
+    Starting = 1
+    Playing = 2
+    Stopping = 3
+
+
+class MainContentComponent(juce_multi(juce.Component, juce.ChangeListener, juce.Timer)):
     openButton = juce.TextButton()
     playButton = juce.TextButton()
     stopButton = juce.TextButton()
@@ -40,7 +44,7 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
 
     audioSource = AudioSource()
     audioSourcePlayer = juce.AudioSourcePlayer()
-    readerSource = None
+    readerSource = cppyy.nullptr
     isLooping = False
 
     deviceManager = juce.AudioDeviceManager()
@@ -48,16 +52,14 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
     state = TransportState.Stopped
 
     def __init__(self):
-        juce.Component.__init__(self)
-        juce.ChangeListener.__init__(self)
-        juce.Timer.__init__(self)
+        super().__init__((), (), (), ())
 
         self.addAndMakeVisible(self.openButton)
         self.openButton.setButtonText("Open...")
         self.openButton.onClick = self.openButtonClicked
 
-        self.addAndMakeVisible (self.playButton)
-        self.playButton.setButtonText ("Play")
+        self.addAndMakeVisible(self.playButton)
+        self.playButton.setButtonText("Play")
         self.playButton.onClick = self.playButtonClicked
         self.playButton.setColour(juce.TextButton.buttonColourId, juce.Colours.green)
         self.playButton.setEnabled(False)
@@ -78,24 +80,25 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
         self.formatManager.registerBasicFormats()
         self.audioSource.transportSource.addChangeListener(self)
 
-        self.deviceManager.initialise(0, 2, None, True)
+        self.deviceManager.initialise(0, 2, cppyy.nullptr, True)
         self.deviceManager.addAudioCallback(self.audioSourcePlayer)
         self.audioSourcePlayer.setSource(self.audioSource)
 
         self.setSize(400, 400)
         self.startTimer(20)
 
-    def visibilityChanged(self):
-        if self.isVisible() or not self.deviceManager:
+    def __del__(self):
+        if not self.deviceManager:
             return
 
         self.audioSource.hasReader.set(False)
         self.deviceManager.removeAudioCallback(self.audioSourcePlayer)
 
-        self.audioSource.transportSource.setSource(None)
-        self.audioSourcePlayer.setSource(None)
+        self.audioSource.transportSource.setSource(cppyy.nullptr)
+        self.audioSourcePlayer.setSource(cppyy.nullptr)
 
         self.deviceManager.closeAudioDevice()
+        self.deviceManager = None
 
     def resized(self):
         self.openButton.setBounds(10, 10, self.getWidth() - 20, 20)
@@ -105,7 +108,6 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
         self.currentPositionLabel.setBounds(10, 130, self.getWidth() - 20, 20)
 
     def changeListenerCallback(self, source):
-        print("changeListenerCallback", source, self.audioSource.transportSource)
         if source == self.audioSource.transportSource:
             if self.audioSource.transportSource.isPlaying():
                 self.changeState(TransportState.Playing)
@@ -114,13 +116,15 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
 
     def timerCallback(self):
         if self.audioSource.transportSource.isPlaying():
-            position = juce.RelativeTime(self.audioSource.transportSource.getCurrentPosition())
+            position = juce.RelativeTime(
+                self.audioSource.transportSource.getCurrentPosition()
+            )
 
             minutes = int(position.inMinutes()) % 60
             seconds = int(position.inSeconds()) % 60
-            millis  = int(position.inMilliseconds()) % 1000
+            millis = int(position.inMilliseconds()) % 1000
 
-            positionString = "{:02d}:{:02d}:{:03d}".format(minutes, seconds, millis)
+            positionString = f"{minutes:02d}:{seconds:02d}:{millis:03d}"
 
             self.currentPositionLabel.setText(positionString, juce.dontSendNotification)
         else:
@@ -132,12 +136,11 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
         if self.readerSource:
             self.readerSource.setLooping(self.isLooping)
 
-    def changeState (self, newState):
+    def changeState(self, newState):
         if self.state == newState:
             return
 
         self.state = newState
-        print(self.state)
 
         if self.state == TransportState.Stopped:
             self.stopButton.setEnabled(False)
@@ -155,17 +158,21 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
             self.audioSource.transportSource.stop()
 
     def openButtonClicked(self):
-        chooser = juce.FileChooser("Select a Wave file to play...", juce.File(), "*.wav")
+        chooser = juce.FileChooser(
+            "Select a Wave file to play...", juce.File(), "*.wav"
+        )
 
         if chooser.browseForFileToOpen():
-            self.reader = self.formatManager.createReaderFor(chooser.getResult())
+            reader = self.formatManager.createReaderFor(chooser.getResult())
 
-            if self.reader:
-                self.readerSource = juce.AudioFormatReaderSource(self.reader, False)
+            if reader:
+                self.readerSource = juce.AudioFormatReaderSource(reader, True)
                 if self.isLooping:
                     self.readerSource.setLooping(self.isLooping)
 
-                self.audioSource.transportSource.setSource(self.readerSource, 0, None, self.reader.sampleRate, 2)
+                self.audioSource.transportSource.setSource(
+                    self.readerSource, 0, cppyy.nullptr, reader.sampleRate, 2
+                )
                 self.audioSource.hasReader.set(True)
 
                 self.playButton.setEnabled(True)
@@ -184,4 +191,4 @@ class MainContentComponent(juce.Component, juce.ChangeListener, juce.Timer):
 
 
 if __name__ == "__main__":
-    START_JUCE_COMPONENT(MainContentComponent, name="Audio Player")
+    START_JUCE_COMPONENT(MainContentComponent, name="C++ Audio Player")
